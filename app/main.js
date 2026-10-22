@@ -15,12 +15,12 @@
 
   var PRIMARY_APPS = [
     { id: 'netflix', name: 'Netflix', mark: true, appId: 'org.tizen.netflix-app' },
+    { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
     { id: 'iplayer', name: 'BBC iPlayer', mark: true, appId: 'DqEoaplKlw.bbchybrid' },
     { id: 'itvx', name: 'ITVX', mark: true, appId: 'OEvCiupaFR.ITVHub' },
     { id: 'channel4', name: 'Channel 4', mark: true, appId: 'OCaxbgg9v6.chfourctv' },
     { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
     { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
-    { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
     { id: 'cameras', name: 'Cameras', mark: true, appId: 'app.smartthings' },
     { id: 'firetv', name: 'Fire TV', mark: true, appId: 'input.hdmi', input: 0 }
   ];
