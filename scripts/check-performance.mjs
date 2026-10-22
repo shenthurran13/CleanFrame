@@ -85,7 +85,7 @@ try {
   page.on('requestfailed', request => { if (!page.__closing && request.failure()?.errorText !== 'net::ERR_ABORTED') report.errors.push(request.failure()?.errorText + ' ' + request.url()); });
   await page.addInitScript(() => {
     const primary = [
-      ['org.tizen.netflix-app', 'Netflix'], ['DqEoaplKlw.bbchybrid', 'BBC iPlayer'], ['OEvCiupaFR.ITVHub', 'ITVX'], ['OCaxbgg9v6.chfourctv', 'Channel 4'], ['MCmYXNxgcu.DisneyPlus', 'Disney+'], ['org.tizen.primevideo', 'Prime Video'], ['9Ur5IzDKqV.TizenYouTube', 'YouTube'], ['com.samsung.tv.aria-video', 'Apple TV'], ['1Qb6IoAcGC.NowTV', 'NOW']
+      ['org.tizen.netflix-app', 'Netflix'], ['DqEoaplKlw.bbchybrid', 'BBC iPlayer'], ['OEvCiupaFR.ITVHub', 'ITVX'], ['OCaxbgg9v6.chfourctv', 'Channel 4'], ['MCmYXNxgcu.DisneyPlus', 'Disney+'], ['org.tizen.primevideo', 'Prime Video'], ['9Ur5IzDKqV.TizenYouTube', 'YouTube'], ['com.samsung.tv.aria-video', 'Apple TV']
     ];
     const catalogue = primary.map(([id, name]) => ({ id, name, show: true, iconPath: '' }));
     for (let i = 0; i < 14; i++) catalogue.push({ id: 'Qa12345678.Stream' + i, name: 'Streaming app ' + String(i + 1).padStart(2, '0'), show: true, iconPath: '' });
@@ -93,7 +93,7 @@ try {
       getAppsInfo(ok) { setTimeout(() => ok(catalogue), 0); },
       launch(id, ok) { setTimeout(ok, 0); }
     } };
-    localStorage.setItem('cleanframe.home.v1', JSON.stringify({ dock: ['netflix',  'iplayer',  'itvx',  'channel4',  'disneyplus',  'primevideo',  'youtube',  'appletv',  'now'], wallpaper: 'misty', mode: 'fixed', theme: 'shore', lastApp: 'netflix' }));
+    localStorage.setItem('cleanframe.home.v1', JSON.stringify({ dock: ['netflix', 'firetv', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'youtube', 'appletv'], wallpaper: 'misty', mode: 'fixed', theme: 'shore', lastApp: 'netflix' }));
   });
   cdp = await page.context().newCDPSession(page);
   await cdp.send('Performance.enable');

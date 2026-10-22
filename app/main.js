@@ -15,14 +15,14 @@
 
   var PRIMARY_APPS = [
     { id: 'netflix', name: 'Netflix', mark: true, appId: 'org.tizen.netflix-app' },
+    { id: 'firetv', name: 'Fire TV', mark: true, appId: 'input.hdmi', input: 0 },
     { id: 'iplayer', name: 'BBC iPlayer', mark: true, appId: 'DqEoaplKlw.bbchybrid' },
     { id: 'itvx', name: 'ITVX', mark: true, appId: 'OEvCiupaFR.ITVHub' },
     { id: 'channel4', name: 'Channel 4', mark: true, appId: 'OCaxbgg9v6.chfourctv' },
     { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
     { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
     { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
-    { id: 'appletv', name: 'Apple TV', mark: true, appId: 'com.samsung.tv.aria-video' },
-    { id: 'now', name: 'NOW', mark: true, appId: '1Qb6IoAcGC.NowTV' }
+    { id: 'appletv', name: 'Apple TV', mark: true, appId: 'com.samsung.tv.aria-video' }
   ];
   var PRIMARY = PRIMARY_APPS.map(function (a) { return a.id; }), APPS = PRIMARY_APPS.slice(), ALPHA = [];
   var WALLS = window.CleanFrameWallpapers || [{ id: 'misty', name: 'Misty coast', tone: 'light', ut: { tr: 'mist', br: 'mist' }, frostVeil: .20 }];
@@ -461,8 +461,25 @@
     if (!a || busy) return;
     if (S.c.home.indexOf(id) >= 0) { c = next(S.c.home.slice(), S.c.recent.slice()); c.lastApp = id; write(c, 'Last app'); }
     S.press = id; S.lastLaunch = a.name;
+    if (a.input !== undefined) { watchInput(a); return; }
     perform(a.name, function (done) { FrameDevice.launchApp(a.appId, done); });
   }
+  /* HDMI shortcut: show the input full screen inside CleanFrame. Back returns Home. */
+  var live = null;
+  function watchInput(a) {
+    perform(a.name, function (done) {
+      FrameDevice.input(a.input, function (err, source) {
+        if (!err) { live = { name: a.name, source: source }; document.documentElement.className += ' is-live'; }
+        done(err);
+      });
+    });
+  }
+  function stopInput() {
+    if (!live) return;
+    live = null; document.documentElement.className = document.documentElement.className.replace(/\s*is-live/g, '');
+    FrameDevice.stopInput(function () {}); render(); focusStage();
+  }
+  QA.live = function () { return live ? { name: live.name, source: live.source } : null; };
   function refreshCatalog() {
     var request, oldFocus;
     if (catalog.loading) return;
@@ -1832,6 +1849,7 @@
     if (!k || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     ev.preventDefault();
     if (k === 'ok' || k === 'back') { if (ev.repeat || heldKeys[code]) return; heldKeys[code] = true; }
+    if (live) { if (k === 'back') stopInput(); return; }
     press(k);
   });
   document.addEventListener('keyup', function (ev) { delete heldKeys[ev.keyCode]; });
@@ -1839,7 +1857,7 @@
   window.addEventListener('focus', function () { release(); focusStage(); after(); updateClock(); });
   document.addEventListener('visibilitychange', function () {
     heldKeys = {};
-    if (document.hidden) { pauseRotation(); clearTimeout(clockTimer); }
+    if (document.hidden) { stopInput(); pauseRotation(); clearTimeout(clockTimer); }
     else { release(); after(); updateClock(); focusStage(); }
   });
   window.addEventListener('resize', fit);

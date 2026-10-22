@@ -10,13 +10,13 @@
     primevideo: 'org.tizen.primevideo',
     youtube: '9Ur5IzDKqV.TizenYouTube',
     appletv: 'com.samsung.tv.aria-video',
-    now: '1Qb6IoAcGC.NowTV'
+    firetv: 'input.hdmi'
   };
-  var STREAMING = ['EkzyZtmneG.My5', 'VQr0RGkyS9.UKTVPlay', 'rJeHak5zRg.Spotify',
+  var STREAMING = ['1Qb6IoAcGC.NowTV', 'EkzyZtmneG.My5', 'VQr0RGkyS9.UKTVPlay', 'rJeHak5zRg.Spotify',
     '3KA0pm7a7V.TubiTV', 'IkWsFHtOY9.Stremio', 'org.tizen.apple.apple-music'];
   /* App IDs can change between firmware/regions. If an ID misses, match the installed app by name. */
   var NAMES = { netflix: /^netflix$/i, iplayer: /iplayer/i, itvx: /^itv/i, channel4: /channel ?4|all ?4/i,
-    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, appletv: /^apple tv$/i, now: /^now( tv)?$/i };
+    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, appletv: /^apple tv$/i };
   var CONSUMER_SYSTEM = ['org.tizen.browser', 'com.microsoft.copilot'];
   var EXTRA_BRANDS = {'rJeHak5zRg.Spotify': 'spotify', '5b8c3eb16b.BeamCTVDev': 'hbomax', '3KA0pm7a7V.TubiTV': 'tubi'};
   var INTERNAL = ['adplatform.ADPlayer', 'WykOS4t4F0.cmsWebApp', '25emanual3.emanual',
@@ -50,6 +50,7 @@
     } catch (err) { done(null); }
   }
   function launch(brand, done) {
+    if (brand === 'firetv') { input(0, done); return; }
     if (!IDS[brand]) { done({message: 'This app has no launch target.'}); return; }
     launchApp(IDS[brand], function (err) {
       if (!err || !api()) { done(err); return; }
@@ -67,6 +68,26 @@
       var control = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/default', null, null, null, data);
       api().launchAppControl(control, 'org.tizen.art-app', function () { finish(null); }, function (err) { finish(failure(err)); });
     } catch (err) { finish(failure(err)); }
+  }
+  /* Live HDMI input via the public TVWindow API. port 0 = first connected HDMI input. */
+  function input(port, done) {
+    var tv = window.tizen;
+    if (!tv || !tv.tvwindow || !tv.systeminfo) { unavailable(done); return; }
+    var finish = bounded(done);
+    try {
+      tv.systeminfo.getPropertyValue('VIDEOSOURCE', function (info) {
+        var list = (info && info.connected || []).filter(function (s) { return s.type === 'HDMI'; }), pick = null;
+        list.forEach(function (s) { if (!pick && (!port || s.number === port)) pick = s; });
+        if (!pick) { finish({ message: port ? 'HDMI ' + port + ' is not connected.' : 'No connected HDMI input was found.', detail: 'Check the Fire TV Stick is plugged in and powered.' }); return; }
+        tv.tvwindow.setSource(pick, function () {
+          tv.tvwindow.show(function () { finish(null, { type: pick.type, number: pick.number }); },
+            function (err) { finish(failure(err)); }, ['0px', '0px', '1920px', '1080px'], 'MAIN');
+        }, function (err) { finish(failure(err)); }, 'MAIN');
+      }, function (err) { finish(failure(err)); });
+    } catch (err) { finish(failure(err)); }
+  }
+  function stopInput(done) {
+    try { window.tizen.tvwindow.hide(function () { done(); }, function () { done(); }, 'MAIN'); } catch (err) { done(); }
   }
   function home(done) { launchApp('com.samsung.tv.csfs', done); }
   function settings(done) { launchApp('com.samsung.tv.coba.setting', done); }
@@ -98,5 +119,5 @@
       }, function (err) { finish(failure(err)); });
     } catch (err) { finish(failure(err)); }
   }
-  window.FrameDevice = { launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps };
+  window.FrameDevice = { input: input, stopInput: stopInput, launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps };
 }());
