@@ -11,5 +11,9 @@
   "art": "CleanFrame original utility outline, 24px grid / 1.6px stroke",
   "apps": "CleanFrame original utility outline, 24px grid / 1.6px stroke",
   "settings": "CleanFrame original utility outline, 24px grid / 1.6px stroke",
-  "home": "CleanFrame original utility outline, 24px grid / 1.6px stroke"
+  "home": "CleanFrame original utility outline, 24px grid / 1.6px stroke",
+  "itvx": "https://github.com/simple-icons/simple-icons/blob/16.35.0/icons/itvx.svg (CC0; recoloured white)",
+  "channel4": "https://github.com/simple-icons/simple-icons/blob/16.35.0/icons/channel4.svg (CC0; recoloured white)",
+  "now": "https://github.com/simple-icons/simple-icons/blob/16.35.0/icons/now.svg (CC0; recoloured white)",
+  "iplayer": "Original generic play glyph (CleanFrame UK fork); not a BBC mark"
 }

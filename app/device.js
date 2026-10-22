@@ -2,15 +2,21 @@
 (function () {
   'use strict';
   var IDS = {
-    stremio: 'IkWsFHtOY9.Stremio', netflix: 'org.tizen.netflix-app',
-    disneyplus: 'MCmYXNxgcu.DisneyPlus', youtube: '9Ur5IzDKqV.TizenYouTube',
-    appletv: 'com.samsung.tv.aria-video', primevideo: 'org.tizen.primevideo',
-    abciview: 'mWK87Xghap.ABCiview', sbs: 'OyE7OuxlUi.SBSOnDemand',
-    applemusic: 'org.tizen.apple.apple-music'
+    netflix: 'org.tizen.netflix-app',
+    iplayer: 'DqEoaplKlw.bbchybrid',
+    itvx: 'OEvCiupaFR.ITVHub',
+    channel4: 'OCaxbgg9v6.chfourctv',
+    disneyplus: 'MCmYXNxgcu.DisneyPlus',
+    primevideo: 'org.tizen.primevideo',
+    youtube: '9Ur5IzDKqV.TizenYouTube',
+    appletv: 'com.samsung.tv.aria-video',
+    now: '1Qb6IoAcGC.NowTV'
   };
-  var STREAMING = ['as6cYRgkPy.Binge', '73iTZRTc34.Stan', '5b8c3eb16b.BeamCTVDev',
-    'KaLitts8bq.tenplaySamsungTizen', 'eYuOiOLYQX.KayoSports', 'Ne2ZsPWdKl.9NOW',
-    '3KA0pm7a7V.TubiTV', 'rJeHak5zRg.Spotify', 'icp4AvUPiA.7plus'];
+  var STREAMING = ['EkzyZtmneG.My5', 'VQr0RGkyS9.UKTVPlay', 'rJeHak5zRg.Spotify',
+    '3KA0pm7a7V.TubiTV', 'IkWsFHtOY9.Stremio', 'org.tizen.apple.apple-music'];
+  /* App IDs can change between firmware/regions. If an ID misses, match the installed app by name. */
+  var NAMES = { netflix: /^netflix$/i, iplayer: /iplayer/i, itvx: /^itv/i, channel4: /channel ?4|all ?4/i,
+    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, appletv: /^apple tv$/i, now: /^now( tv)?$/i };
   var CONSUMER_SYSTEM = ['org.tizen.browser', 'com.microsoft.copilot'];
   var EXTRA_BRANDS = {'rJeHak5zRg.Spotify': 'spotify', '5b8c3eb16b.BeamCTVDev': 'hbomax', '3KA0pm7a7V.TubiTV': 'tubi'};
   var INTERNAL = ['adplatform.ADPlayer', 'WykOS4t4F0.cmsWebApp', '25emanual3.emanual',
@@ -34,9 +40,24 @@
     try { api().launch(id, function () { finish(null); }, function (err) { finish(failure(err)); }); }
     catch (err) { finish(failure(err)); }
   }
+  function byName(brand, done) {
+    if (!api() || !NAMES[brand]) { done(null); return; }
+    try {
+      api().getAppsInfo(function (list) {
+        for (var i = 0; i < list.length; i++) if (list[i].name && NAMES[brand].test(list[i].name)) { done(list[i].id); return; }
+        done(null);
+      }, function () { done(null); });
+    } catch (err) { done(null); }
+  }
   function launch(brand, done) {
     if (!IDS[brand]) { done({message: 'This app has no launch target.'}); return; }
-    launchApp(IDS[brand], done);
+    launchApp(IDS[brand], function (err) {
+      if (!err || !api()) { done(err); return; }
+      byName(brand, function (id) {
+        if (!id || id === IDS[brand]) { done(err); return; }
+        IDS[brand] = id; launchApp(id, done);
+      });
+    });
   }
   function art(done) {
     if (!api()) { unavailable(done); return; }
@@ -56,6 +77,13 @@
       api().getAppsInfo(function (list) {
         var known = {}, seen = {}, result = [];
         Object.keys(IDS).forEach(function (brand) { known[IDS[brand]] = brand; });
+        list.forEach(function (a) {
+          if (known[a.id] || !a.name) return;
+          Object.keys(NAMES).forEach(function (brand) {
+            var taken = list.some(function (b) { return b.id === IDS[brand]; });
+            if (!taken && NAMES[brand].test(a.name)) { IDS[brand] = a.id; known[a.id] = brand; }
+          });
+        });
         list.forEach(function (a) {
           var primary = !!known[a.id], stream = STREAMING.indexOf(a.id) >= 0;
           var consumer = /^[A-Za-z0-9]{10}\.[A-Za-z0-9_-]+$/.test(a.id) || CONSUMER_SYSTEM.indexOf(a.id) >= 0;
