@@ -15,14 +15,14 @@
 
   var PRIMARY_APPS = [
     { id: 'netflix', name: 'Netflix', mark: true, appId: 'org.tizen.netflix-app' },
-    { id: 'firetv', name: 'Fire TV', mark: true, appId: 'input.hdmi', input: 0 },
     { id: 'iplayer', name: 'BBC iPlayer', mark: true, appId: 'DqEoaplKlw.bbchybrid' },
     { id: 'itvx', name: 'ITVX', mark: true, appId: 'OEvCiupaFR.ITVHub' },
     { id: 'channel4', name: 'Channel 4', mark: true, appId: 'OCaxbgg9v6.chfourctv' },
     { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
     { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
     { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
-    { id: 'appletv', name: 'Apple TV', mark: true, appId: 'com.samsung.tv.aria-video' }
+    { id: 'appletv', name: 'Apple TV', mark: true, appId: 'com.samsung.tv.aria-video' },
+    { id: 'firetv', name: 'Fire TV', mark: true, appId: 'input.hdmi', input: 0 }
   ];
   var PRIMARY = PRIMARY_APPS.map(function (a) { return a.id; }), APPS = PRIMARY_APPS.slice(), ALPHA = [];
   var WALLS = window.CleanFrameWallpapers || [{ id: 'misty', name: 'Misty coast', tone: 'light', ut: { tr: 'mist', br: 'mist' }, frostVeil: .20 }];

@@ -4,9 +4,9 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { openPreview, root } from './browser.mjs';
 
 const KEY = 'cleanframe.home.v1';
-const PRIMARY = ['netflix', 'firetv', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'youtube', 'appletv'];
-const IDS = ['org.tizen.netflix-app', 'input.hdmi', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', '9Ur5IzDKqV.TizenYouTube', 'com.samsung.tv.aria-video'];
-const NAMES = ['Netflix', 'Fire TV', 'BBC iPlayer', 'ITVX', 'Channel 4', 'Disney+', 'Prime Video', 'YouTube', 'Apple TV'];
+const PRIMARY = ['netflix', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'youtube', 'appletv', 'firetv'];
+const IDS = ['org.tizen.netflix-app', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', '9Ur5IzDKqV.TizenYouTube', 'com.samsung.tv.aria-video', 'input.hdmi'];
+const NAMES = ['Netflix', 'BBC iPlayer', 'ITVX', 'Channel 4', 'Disney+', 'Prime Video', 'YouTube', 'Apple TV', 'Fire TV'];
 const EXTRA = 'AbCdEf1234.FamilyApp', SPOTIFY = 'rJeHak5zRg.Spotify';
 const UNSAFE_NAME = 'Family <img src=x onerror="window.__catalogXss=1"> & TV';
 const CATALOG = IDS.map((id, i) => ({ id, name: NAMES[i], show: true, iconPath: '' })).concat([

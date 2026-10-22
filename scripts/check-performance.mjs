@@ -93,7 +93,7 @@ try {
       getAppsInfo(ok) { setTimeout(() => ok(catalogue), 0); },
       launch(id, ok) { setTimeout(ok, 0); }
     } };
-    localStorage.setItem('cleanframe.home.v1', JSON.stringify({ dock: ['netflix', 'firetv', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'youtube', 'appletv'], wallpaper: 'misty', mode: 'fixed', theme: 'shore', lastApp: 'netflix' }));
+    localStorage.setItem('cleanframe.home.v1', JSON.stringify({ dock: ['netflix', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'youtube', 'appletv', 'firetv'], wallpaper: 'misty', mode: 'fixed', theme: 'shore', lastApp: 'netflix' }));
   });
   cdp = await page.context().newCDPSession(page);
   await cdp.send('Performance.enable');
