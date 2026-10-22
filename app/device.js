@@ -9,14 +9,14 @@
     disneyplus: 'MCmYXNxgcu.DisneyPlus',
     primevideo: 'org.tizen.primevideo',
     youtube: '9Ur5IzDKqV.TizenYouTube',
-    appletv: 'com.samsung.tv.aria-video',
+    cameras: '',
     firetv: 'input.hdmi'
   };
-  var STREAMING = ['1Qb6IoAcGC.NowTV', 'EkzyZtmneG.My5', 'VQr0RGkyS9.UKTVPlay', 'rJeHak5zRg.Spotify',
+  var STREAMING = ['1Qb6IoAcGC.NowTV', 'com.samsung.tv.aria-video', 'EkzyZtmneG.My5', 'VQr0RGkyS9.UKTVPlay', 'rJeHak5zRg.Spotify',
     '3KA0pm7a7V.TubiTV', 'IkWsFHtOY9.Stremio', 'org.tizen.apple.apple-music'];
   /* App IDs can change between firmware/regions. If an ID misses, match the installed app by name. */
   var NAMES = { netflix: /^netflix$/i, iplayer: /iplayer/i, itvx: /^itv/i, channel4: /channel ?4|all ?4/i,
-    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, appletv: /^apple tv$/i };
+    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, cameras: /smartthings/i };
   var CONSUMER_SYSTEM = ['org.tizen.browser', 'com.microsoft.copilot'];
   var EXTRA_BRANDS = {'rJeHak5zRg.Spotify': 'spotify', '5b8c3eb16b.BeamCTVDev': 'hbomax', '3KA0pm7a7V.TubiTV': 'tubi'};
   var INTERNAL = ['adplatform.ADPlayer', 'WykOS4t4F0.cmsWebApp', '25emanual3.emanual',
@@ -51,6 +51,13 @@
   }
   function launch(brand, done) {
     if (brand === 'firetv') { input(0, done); return; }
+    if (!IDS[brand] && NAMES[brand]) {
+      byName(brand, function (id) {
+        if (!id) { done({ message: 'SmartThings was not found on this TV.', detail: 'Install SmartThings from the Samsung app store, then try again.' }); return; }
+        IDS[brand] = id; launchApp(id, done);
+      });
+      return;
+    }
     if (!IDS[brand]) { done({message: 'This app has no launch target.'}); return; }
     launchApp(IDS[brand], function (err) {
       if (!err || !api()) { done(err); return; }

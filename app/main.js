@@ -21,7 +21,7 @@
     { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
     { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
     { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
-    { id: 'appletv', name: 'Apple TV', mark: true, appId: 'com.samsung.tv.aria-video' },
+    { id: 'cameras', name: 'Cameras', mark: true, appId: 'app.smartthings' },
     { id: 'firetv', name: 'Fire TV', mark: true, appId: 'input.hdmi', input: 0 }
   ];
   var PRIMARY = PRIMARY_APPS.map(function (a) { return a.id; }), APPS = PRIMARY_APPS.slice(), ALPHA = [];
@@ -462,7 +462,7 @@
     if (S.c.home.indexOf(id) >= 0) { c = next(S.c.home.slice(), S.c.recent.slice()); c.lastApp = id; write(c, 'Last app'); }
     S.press = id; S.lastLaunch = a.name;
     if (a.input !== undefined) { watchInput(a); return; }
-    perform(a.name, function (done) { FrameDevice.launchApp(a.appId, done); });
+    perform(a.name, function (done) { if (PRIMARY.indexOf(a.id) >= 0) FrameDevice.launch(a.id, done); else FrameDevice.launchApp(a.appId, done); });
   }
   /* HDMI shortcut: show the input full screen inside CleanFrame. Back returns Home. */
   var live = null;
