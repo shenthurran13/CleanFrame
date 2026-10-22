@@ -114,7 +114,8 @@ try {
   await scene('settings');
   await sample('Settings navigation', ['down', 'down', 'up', 'up']);
   await scene('apps');
-  check('Performance inventory includes 23 real-adapter rows', (await call('state')).catalog.ids.length === 23);
+  // 8 installed dock apps + 14 extras; Fire TV is an HDMI input, not an installed app.
+  check('Performance inventory includes 22 real-adapter rows', (await call('state')).catalog.ids.length === 22);
   await sample('All Apps grid navigation', ['down', 'down', 'right', 'up', 'up', 'left']);
   await scene('editor');
   await sample('Apps on Home navigation', ['down', 'down', 'down', 'up', 'up', 'up']);
