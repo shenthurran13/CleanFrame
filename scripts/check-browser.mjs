@@ -4,9 +4,9 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { openPreview, root } from './browser.mjs';
 
 const KEY = 'cleanframe.home.v1';
-const PRIMARY = ['netflix', 'youtube', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'livetv', 'firetv'];
-const IDS = ['org.tizen.netflix-app', '9Ur5IzDKqV.TizenYouTube', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', 'input.tv', 'input.hdmi'];
-const NAMES = ['Netflix', 'YouTube', 'BBC iPlayer', 'ITVX', 'Channel 4', 'Disney+', 'Prime Video', 'Live TV', 'Fire TV'];
+const PRIMARY = ['netflix', 'youtube', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'stremio', 'livetv', 'firetv'];
+const IDS = ['org.tizen.netflix-app', '9Ur5IzDKqV.TizenYouTube', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', 'IkWsFHtOY9.Stremio', 'input.tv', 'input.hdmi'];
+const NAMES = ['Netflix', 'YouTube', 'BBC iPlayer', 'ITVX', 'Channel 4', 'Disney+', 'Prime Video', 'Stremio', 'Live TV', 'Fire TV'];
 const EXTRA = 'AbCdEf1234.FamilyApp', SPOTIFY = 'rJeHak5zRg.Spotify';
 const UNSAFE_NAME = 'Family <img src=x onerror="window.__catalogXss=1"> & TV';
 const CATALOG = IDS.map((id, i) => ({ id, name: NAMES[i], show: true, iconPath: '' })).concat([
@@ -221,7 +221,7 @@ try {
     await closePage();
     await page({ seed: { dock: [], wallpaper: 'missing', mode: 'constructor', theme: 'constructor' } });
     const s = await state();
-    check('Invalid values recover usable bounded Home', s.dock.length >= 1 && s.dock.length <= 9 && walls.some(w => w.id === s.wallpaper) && ['fixed', 'open', '5', '15', '60'].includes(s.mode), s);
+    check('Invalid values recover usable bounded Home', s.dock.length >= 1 && s.dock.length <= 10 && walls.some(w => w.id === s.wallpaper) && ['fixed', 'open', '5', '15', '60'].includes(s.mode), s);
     await closePage();
     await page({ seed: baseline({ dock: [EXTRA, 'netflix'], lastApp: EXTRA }), catalogFailure: true });
     await library();
@@ -237,7 +237,7 @@ try {
   await run('Real catalogue and native launch boundary', async () => {
     await page(); await library();
     const names = await current.locator('[data-action^="apps.open."] .label').allTextContents();
-    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 12 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanFrame') && !names.includes('Background worker'), names);
+    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 13 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanFrame') && !names.includes('Background worker'), names);
     check('Installed names stay text, including HTML punctuation', names.includes(UNSAFE_NAME) && !(await current.evaluate(() => window.__catalogXss)));
     check('Exploration fixtures do not appear', !names.includes('Plex') && !names.includes('Jellyfin'));
     await act('apps.open.' + SPOTIFY); await current.waitForFunction(() => __tv.calls.length > 0);
@@ -264,7 +264,7 @@ try {
     check('Catalogue failure leaves Home intact', same((await state()).dock, PRIMARY));
     await current.evaluate(() => { __tv.catalogFailure = false; }); await act('apps.retry');
     await current.waitForSelector('[data-action="apps.open.' + EXTRA + '"]');
-    check('Retry displays real installed names', (await current.locator('[data-action^="apps.open."]').count()) === 12);
+    check('Retry displays real installed names', (await current.locator('[data-action^="apps.open."]').count()) === 13);
   });
   await run('Native icon and failed-image fallback', async () => {
     await page({ catalog: CATALOG.map(a => a.id === EXTRA ? { ...a, iconPath: '/home/assets/icons/netflix.svg' } : a) });
@@ -304,9 +304,9 @@ try {
     await act('editor.move.netflix'); await nav('down', 'ok');
     const n = start.indexOf('netflix'), moved = start.slice(); [moved[n], moved[n + 1]] = [moved[n + 1], moved[n]];
     check('Placed move persists immediately', same((await stored()).dock, moved));
-    await act('editor.add.' + EXTRA); check('Nine-app cap prevents addition', (await state()).dock.length === 9 && !(await state()).dock.includes(EXTRA));
+    await act('editor.add.' + EXTRA); check('Ten-app cap prevents addition', (await state()).dock.length === 10 && !(await state()).dock.includes(EXTRA));
     await remove('youtube'); await act('editor.add.' + EXTRA);
-    check('Native app can be pinned with stable ID', (await stored()).dock.includes(EXTRA) && (await state()).dock.length === 9);
+    check('Native app can be pinned with stable ID', (await stored()).dock.includes(EXTRA) && (await state()).dock.length === 10);
     check('Native pin retains readable metadata for failed discovery', (await stored()).appRecords.some(a => a.id === EXTRA && a.name === UNSAFE_NAME));
     await current.reload(); await ready(); check('Native pin survives reload', (await state()).dock.includes(EXTRA));
     await editor(); const ids = (await state()).dock;
@@ -808,7 +808,7 @@ try {
   await run('Physical-key repeats and Back hierarchy', async () => {
     await page(); await editor(); await remove('netflix');
     await current.keyboard.down('Enter'); await current.keyboard.down('Enter');
-    check('Held OK restores once without removing again', (await state()).dock.includes('netflix') && (await state()).dock.length === 9);
+    check('Held OK restores once without removing again', (await state()).dock.includes('netflix') && (await state()).dock.length === 10);
     await current.keyboard.up('Enter');
     await current.keyboard.down('Escape'); await current.keyboard.down('Escape');
     check('Held Back closes one layer only', (await call('where')).view === 'settings' && (await state()).focusAction === 'settings.editor');

@@ -9,14 +9,15 @@
     disneyplus: 'MCmYXNxgcu.DisneyPlus',
     primevideo: 'org.tizen.primevideo',
     youtube: '9Ur5IzDKqV.TizenYouTube',
+    stremio: 'IkWsFHtOY9.Stremio',
     livetv: 'input.tv',
     firetv: 'input.hdmi'
   };
   var STREAMING = ['1Qb6IoAcGC.NowTV', 'com.samsung.tv.aria-video', 'EkzyZtmneG.My5', 'VQr0RGkyS9.UKTVPlay', 'rJeHak5zRg.Spotify',
-    '3KA0pm7a7V.TubiTV', 'IkWsFHtOY9.Stremio', 'org.tizen.apple.apple-music'];
+    '3KA0pm7a7V.TubiTV', 'org.tizen.apple.apple-music'];
   /* App IDs can change between firmware/regions. If an ID misses, match the installed app by name. */
   var NAMES = { netflix: /^netflix$/i, iplayer: /iplayer/i, itvx: /^itv/i, channel4: /channel ?4|all ?4/i,
-    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i };
+    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, stremio: /^stremio$/i };
   var CONSUMER_SYSTEM = ['org.tizen.browser', 'com.microsoft.copilot'];
   var EXTRA_BRANDS = {'rJeHak5zRg.Spotify': 'spotify', '5b8c3eb16b.BeamCTVDev': 'hbomax', '3KA0pm7a7V.TubiTV': 'tubi'};
   var INTERNAL = ['adplatform.ADPlayer', 'WykOS4t4F0.cmsWebApp', '25emanual3.emanual',
