@@ -153,36 +153,6 @@ window.CleanFrameWallpapers = [
     "clockMist": false
   },
   {
-    "id": "goldcoast",
-    "name": "Gold Coast dusk",
-    "src": "assets/wallpapers/goldcoast.jpg",
-    "thumb": "assets/wallpapers/goldcoast-thumb.jpg",
-    "tone": "light",
-    "ut": {
-      "tr": "mist",
-      "br": "mist"
-    },
-    "frostVeil": 0.2,
-    "listColumn": 3,
-    "dockQuiet": false,
-    "clockMist": false
-  },
-  {
-    "id": "sydney",
-    "name": "Sydney Harbour",
-    "src": "assets/wallpapers/sydney.jpg",
-    "thumb": "assets/wallpapers/sydney-thumb.jpg",
-    "tone": "light",
-    "ut": {
-      "tr": "mist",
-      "br": "mist"
-    },
-    "frostVeil": 0.44,
-    "listColumn": 3,
-    "dockQuiet": false,
-    "clockMist": true
-  },
-  {
     "id": "amber",
     "name": "Amber hills",
     "src": "assets/wallpapers/amber.jpg",

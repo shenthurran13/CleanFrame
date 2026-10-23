@@ -14,7 +14,7 @@ try {
   page.on('pageerror', e => errors.push(e.message));
   page.on('requestfailed', r => errors.push(r.url() + ' ' + r.failure()?.errorText));
   page.on('response', r => { if (r.status() >= 400) errors.push(r.status() + ' ' + r.url()); });
-  const walls = process.env.GALLERY_IDS ? process.env.GALLERY_IDS.split(',') : ['summit', 'goldcoast', 'sydney', 'amber', 'mint', 'alpine'];
+  const walls = process.env.GALLERY_IDS ? process.env.GALLERY_IDS.split(',') : ['summit', 'amber', 'mint', 'alpine'];
   const fonts = process.env.GALLERY_FONTS ? process.env.GALLERY_FONTS.split(',') : ['manrope'];
   for (const font of fonts) for (const wall of walls) for (const layout of ['list', 'dock']) for (const material of ['soft', 'frost', 'tint']) for (const end of [false, true]) {
     await page.goto(preview.baseURL + '/home/');
