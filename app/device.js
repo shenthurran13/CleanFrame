@@ -19,7 +19,8 @@
   var NAMES = { netflix: /^netflix$/i, iplayer: /iplayer/i, itvx: /^itv/i, channel4: /channel ?4|all ?4/i,
     disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, stremio: /^stremio$/i };
   var CONSUMER_SYSTEM = ['org.tizen.browser', 'com.microsoft.copilot'];
-  var EXTRA_BRANDS = {'rJeHak5zRg.Spotify': 'spotify', '5b8c3eb16b.BeamCTVDev': 'hbomax', '3KA0pm7a7V.TubiTV': 'tubi'};
+  var EXTRA_BRANDS = {'rJeHak5zRg.Spotify': 'spotify', '5b8c3eb16b.BeamCTVDev': 'hbomax', '3KA0pm7a7V.TubiTV': 'tubi',
+    'com.samsung.tv.aria-video': 'appletv', '1Qb6IoAcGC.NowTV': 'now', 'org.tizen.apple.apple-music': 'applemusic'};
   var INTERNAL = ['adplatform.ADPlayer', 'WykOS4t4F0.cmsWebApp', '25emanual3.emanual',
     'ZODRT12q2l.WebAccountExtension', 'ByJlgt0XeD.CastSettingsApp', 'tv6pbVMQFF.PrivacyChoices'];
   var SELF = 'nClrkHome1.FrameHome';
@@ -151,5 +152,6 @@
       }, function (err) { finish(failure(err)); });
     } catch (err) { finish(failure(err)); }
   }
-  window.FrameDevice = { input: input, channel: channel, stopInput: stopInput, launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps };
+  function hasInputs() { return !!(window.tizen && window.tizen.tvwindow && window.tizen.systeminfo); }
+  window.FrameDevice = { hasInputs: hasInputs, input: input, channel: channel, stopInput: stopInput, launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps };
 }());
