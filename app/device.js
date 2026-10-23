@@ -9,14 +9,14 @@
     disneyplus: 'MCmYXNxgcu.DisneyPlus',
     primevideo: 'org.tizen.primevideo',
     youtube: '9Ur5IzDKqV.TizenYouTube',
-    cameras: '',
+    livetv: 'input.tv',
     firetv: 'input.hdmi'
   };
   var STREAMING = ['1Qb6IoAcGC.NowTV', 'com.samsung.tv.aria-video', 'EkzyZtmneG.My5', 'VQr0RGkyS9.UKTVPlay', 'rJeHak5zRg.Spotify',
     '3KA0pm7a7V.TubiTV', 'IkWsFHtOY9.Stremio', 'org.tizen.apple.apple-music'];
   /* App IDs can change between firmware/regions. If an ID misses, match the installed app by name. */
   var NAMES = { netflix: /^netflix$/i, iplayer: /iplayer/i, itvx: /^itv/i, channel4: /channel ?4|all ?4/i,
-    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i, cameras: /smartthings/i };
+    disneyplus: /disney/i, primevideo: /prime video/i, youtube: /^youtube$/i };
   var CONSUMER_SYSTEM = ['org.tizen.browser', 'com.microsoft.copilot'];
   var EXTRA_BRANDS = {'rJeHak5zRg.Spotify': 'spotify', '5b8c3eb16b.BeamCTVDev': 'hbomax', '3KA0pm7a7V.TubiTV': 'tubi'};
   var INTERNAL = ['adplatform.ADPlayer', 'WykOS4t4F0.cmsWebApp', '25emanual3.emanual',
@@ -50,14 +50,8 @@
     } catch (err) { done(null); }
   }
   function launch(brand, done) {
-    if (brand === 'firetv') { input(0, done); return; }
-    if (!IDS[brand] && NAMES[brand]) {
-      byName(brand, function (id) {
-        if (!id) { done({ message: 'SmartThings was not found on this TV.', detail: 'Install SmartThings from the Samsung app store, then try again.' }); return; }
-        IDS[brand] = id; launchApp(id, done);
-      });
-      return;
-    }
+    if (brand === 'firetv') { input('HDMI', done); return; }
+    if (brand === 'livetv') { input('TV', done); return; }
     if (!IDS[brand]) { done({message: 'This app has no launch target.'}); return; }
     launchApp(IDS[brand], function (err) {
       if (!err || !api()) { done(err); return; }
@@ -76,24 +70,54 @@
       api().launchAppControl(control, 'org.tizen.art-app', function () { finish(null); }, function (err) { finish(failure(err)); });
     } catch (err) { finish(failure(err)); }
   }
-  /* Live HDMI input via the public TVWindow API. port 0 = first connected HDMI input. */
-  function input(port, done) {
-    var tv = window.tizen;
+  /* Live inputs via the public TVWindow API: 'HDMI' = first connected HDMI input, 'TV' = the built-in tuner. */
+  var CHANNEL_KEYS = ['ChannelUp', 'ChannelDown'], channelKeys = false;
+  function channelName(tv) {
+    try { var c = tv.tvchannel && tv.tvchannel.getCurrentChannel('MAIN'); return c ? ((c.major ? c.major + '  ' : '') + (c.channelName || '')).trim() : ''; }
+    catch (err) { return ''; }
+  }
+  function keys(on) {
+    var d = window.tizen && window.tizen.tvinputdevice;
+    if (!d || channelKeys === on) return;
+    CHANNEL_KEYS.forEach(function (k) { try { if (on) d.registerKey(k); else d.unregisterKey(k); } catch (err) { /* key may not exist on this remote */ } });
+    channelKeys = on;
+  }
+  function input(kind, done) {
+    var tv = window.tizen, tuner = kind === 'TV';
     if (!tv || !tv.tvwindow || !tv.systeminfo) { unavailable(done); return; }
     var finish = bounded(done);
     try {
       tv.systeminfo.getPropertyValue('VIDEOSOURCE', function (info) {
-        var list = (info && info.connected || []).filter(function (s) { return s.type === 'HDMI'; }), pick = null;
-        list.forEach(function (s) { if (!pick && (!port || s.number === port)) pick = s; });
-        if (!pick) { finish({ message: port ? 'HDMI ' + port + ' is not connected.' : 'No connected HDMI input was found.', detail: 'Check the Fire TV Stick is plugged in and powered.' }); return; }
+        var pick = null;
+        (info && info.connected || []).forEach(function (s) { if (!pick && s.type === kind) pick = s; });
+        if (!pick) {
+          finish(tuner ? { message: 'Live TV is not available.', detail: 'Check the aerial is connected and channels have been tuned in Samsung settings.' }
+            : { message: 'No connected HDMI input was found.', detail: 'Check the Fire TV Stick is plugged in and powered.' });
+          return;
+        }
         tv.tvwindow.setSource(pick, function () {
-          tv.tvwindow.show(function () { finish(null, { type: pick.type, number: pick.number }); },
-            function (err) { finish(failure(err)); }, ['0px', '0px', '1920px', '1080px'], 'MAIN');
+          tv.tvwindow.show(function () {
+            if (tuner) keys(true);
+            finish(null, { type: pick.type, number: pick.number, channel: tuner ? channelName(tv) : '' });
+          }, function (err) { finish(failure(err)); }, ['0px', '0px', '1920px', '1080px'], 'MAIN');
         }, function (err) { finish(failure(err)); }, 'MAIN');
       }, function (err) { finish(failure(err)); });
     } catch (err) { finish(failure(err)); }
   }
+  function channel(step, done) {
+    var tv = window.tizen, c = tv && tv.tvchannel, finished = false;
+    function finish(err, name) { if (!finished) { finished = true; done(err, name); } }
+    if (!c) { finish({ message: 'Channel changing is not available here.' }); return; }
+    try {
+      c[step > 0 ? 'tuneUp' : 'tuneDown']({
+        onsuccess: function () { finish(null, channelName(tv)); },
+        onnosignal: function () { finish(null, (channelName(tv) + '  No signal').trim()); },
+        onprograminforeceived: function () {}
+      }, function (err) { finish({ message: 'Could not change channel', detail: err && err.message }); }, 'ALL', 'MAIN');
+    } catch (err) { finish({ message: 'Could not change channel', detail: err && err.message }); }
+  }
   function stopInput(done) {
+    keys(false);
     try { window.tizen.tvwindow.hide(function () { done(); }, function () { done(); }, 'MAIN'); } catch (err) { done(); }
   }
   function home(done) { launchApp('com.samsung.tv.csfs', done); }
@@ -126,5 +150,5 @@
       }, function (err) { finish(failure(err)); });
     } catch (err) { finish(failure(err)); }
   }
-  window.FrameDevice = { input: input, stopInput: stopInput, launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps };
+  window.FrameDevice = { input: input, channel: channel, stopInput: stopInput, launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps };
 }());

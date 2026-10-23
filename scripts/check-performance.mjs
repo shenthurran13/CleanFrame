@@ -85,7 +85,7 @@ try {
   page.on('requestfailed', request => { if (!page.__closing && request.failure()?.errorText !== 'net::ERR_ABORTED') report.errors.push(request.failure()?.errorText + ' ' + request.url()); });
   await page.addInitScript(() => {
     const primary = [
-      ['org.tizen.netflix-app', 'Netflix'], ['DqEoaplKlw.bbchybrid', 'BBC iPlayer'], ['OEvCiupaFR.ITVHub', 'ITVX'], ['OCaxbgg9v6.chfourctv', 'Channel 4'], ['MCmYXNxgcu.DisneyPlus', 'Disney+'], ['org.tizen.primevideo', 'Prime Video'], ['9Ur5IzDKqV.TizenYouTube', 'YouTube'], ['app.smartthings', 'SmartThings']
+      ['org.tizen.netflix-app', 'Netflix'], ['DqEoaplKlw.bbchybrid', 'BBC iPlayer'], ['OEvCiupaFR.ITVHub', 'ITVX'], ['OCaxbgg9v6.chfourctv', 'Channel 4'], ['MCmYXNxgcu.DisneyPlus', 'Disney+'], ['org.tizen.primevideo', 'Prime Video'], ['9Ur5IzDKqV.TizenYouTube', 'YouTube']
     ];
     const catalogue = primary.map(([id, name]) => ({ id, name, show: true, iconPath: '' }));
     for (let i = 0; i < 14; i++) catalogue.push({ id: 'Qa12345678.Stream' + i, name: 'Streaming app ' + String(i + 1).padStart(2, '0'), show: true, iconPath: '' });
@@ -93,7 +93,7 @@ try {
       getAppsInfo(ok) { setTimeout(() => ok(catalogue), 0); },
       launch(id, ok) { setTimeout(ok, 0); }
     } };
-    localStorage.setItem('cleanframe.home.v1', JSON.stringify({ dock: ['netflix', 'youtube', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'cameras', 'firetv'], wallpaper: 'misty', mode: 'fixed', theme: 'shore', lastApp: 'netflix' }));
+    localStorage.setItem('cleanframe.home.v1', JSON.stringify({ dock: ['netflix', 'youtube', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'livetv', 'firetv'], wallpaper: 'misty', mode: 'fixed', theme: 'shore', lastApp: 'netflix' }));
   });
   cdp = await page.context().newCDPSession(page);
   await cdp.send('Performance.enable');
@@ -114,8 +114,8 @@ try {
   await scene('settings');
   await sample('Settings navigation', ['down', 'down', 'up', 'up']);
   await scene('apps');
-  // 8 installed dock apps + 14 extras; Fire TV is an HDMI input, not an installed app.
-  check('Performance inventory includes 22 real-adapter rows', (await call('state')).catalog.ids.length === 22);
+  // 7 installed dock apps + 14 extras; Live TV and Fire TV are inputs, not installed apps.
+  check('Performance inventory includes 21 real-adapter rows', (await call('state')).catalog.ids.length === 21);
   await sample('All Apps grid navigation', ['down', 'down', 'right', 'up', 'up', 'left']);
   await scene('editor');
   await sample('Apps on Home navigation', ['down', 'down', 'down', 'up', 'up', 'up']);

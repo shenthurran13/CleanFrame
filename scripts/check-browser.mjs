@@ -4,12 +4,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { openPreview, root } from './browser.mjs';
 
 const KEY = 'cleanframe.home.v1';
-const PRIMARY = ['netflix', 'youtube', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'cameras', 'firetv'];
-const IDS = ['org.tizen.netflix-app', '9Ur5IzDKqV.TizenYouTube', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', 'app.smartthings', 'input.hdmi'];
-const NAMES = ['Netflix', 'YouTube', 'BBC iPlayer', 'ITVX', 'Channel 4', 'Disney+', 'Prime Video', 'Cameras', 'Fire TV'];
+const PRIMARY = ['netflix', 'youtube', 'iplayer', 'itvx', 'channel4', 'disneyplus', 'primevideo', 'livetv', 'firetv'];
+const IDS = ['org.tizen.netflix-app', '9Ur5IzDKqV.TizenYouTube', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', 'input.tv', 'input.hdmi'];
+const NAMES = ['Netflix', 'YouTube', 'BBC iPlayer', 'ITVX', 'Channel 4', 'Disney+', 'Prime Video', 'Live TV', 'Fire TV'];
 const EXTRA = 'AbCdEf1234.FamilyApp', SPOTIFY = 'rJeHak5zRg.Spotify';
 const UNSAFE_NAME = 'Family <img src=x onerror="window.__catalogXss=1"> & TV';
-const CATALOG = IDS.map((id, i) => ({ id, name: NAMES[i] === 'Cameras' ? 'SmartThings' : NAMES[i], show: true, iconPath: '' })).concat([
+const CATALOG = IDS.map((id, i) => ({ id, name: NAMES[i], show: true, iconPath: '' })).concat([
   { id: EXTRA, name: UNSAFE_NAME, show: true, iconPath: '' },
   { id: SPOTIFY, name: 'Spotify', show: true, iconPath: '' },
   { id: '5b8c3eb16b.BeamCTVDev', name: 'HBO Max', show: true, iconPath: '' },
@@ -305,7 +305,7 @@ try {
     const n = start.indexOf('netflix'), moved = start.slice(); [moved[n], moved[n + 1]] = [moved[n + 1], moved[n]];
     check('Placed move persists immediately', same((await stored()).dock, moved));
     await act('editor.add.' + EXTRA); check('Nine-app cap prevents addition', (await state()).dock.length === 9 && !(await state()).dock.includes(EXTRA));
-    await remove('cameras'); await act('editor.add.' + EXTRA);
+    await remove('youtube'); await act('editor.add.' + EXTRA);
     check('Native app can be pinned with stable ID', (await stored()).dock.includes(EXTRA) && (await state()).dock.length === 9);
     check('Native pin retains readable metadata for failed discovery', (await stored()).appRecords.some(a => a.id === EXTRA && a.name === UNSAFE_NAME));
     await current.reload(); await ready(); check('Native pin survives reload', (await state()).dock.includes(EXTRA));

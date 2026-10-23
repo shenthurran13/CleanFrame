@@ -21,8 +21,8 @@
     { id: 'channel4', name: 'Channel 4', mark: true, appId: 'OCaxbgg9v6.chfourctv' },
     { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
     { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
-    { id: 'cameras', name: 'Cameras', mark: true, appId: 'app.smartthings' },
-    { id: 'firetv', name: 'Fire TV', mark: true, appId: 'input.hdmi', input: 0 }
+    { id: 'livetv', name: 'Live TV', mark: true, appId: 'input.tv', input: 'TV' },
+    { id: 'firetv', name: 'Fire TV', mark: true, appId: 'input.hdmi', input: 'HDMI' }
   ];
   var PRIMARY = PRIMARY_APPS.map(function (a) { return a.id; }), APPS = PRIMARY_APPS.slice(), ALPHA = [];
   var WALLS = window.CleanFrameWallpapers || [{ id: 'misty', name: 'Misty coast', tone: 'light', ut: { tr: 'mist', br: 'mist' }, frostVeil: .20 }];
@@ -464,22 +464,41 @@
     if (a.input !== undefined) { watchInput(a); return; }
     perform(a.name, function (done) { if (PRIMARY.indexOf(a.id) >= 0) FrameDevice.launch(a.id, done); else FrameDevice.launchApp(a.appId, done); });
   }
-  /* HDMI shortcut: show the input full screen inside CleanFrame. Back returns Home. */
-  var live = null;
+  /* Input shortcuts (Fire TV on HDMI, Live TV on the tuner) show full screen inside CleanFrame. Back returns Home. */
+  var watching = null, bannerTimer = 0, banner = document.createElement('div');
+  banner.className = 'live-banner'; banner.setAttribute('aria-live', 'polite'); document.body.appendChild(banner);
+  function showBanner(text) {
+    if (!text) return;
+    banner.textContent = text; banner.className = 'live-banner is-on';
+    clearTimeout(bannerTimer); bannerTimer = setTimeout(function () { banner.className = 'live-banner'; }, 3000);
+  }
   function watchInput(a) {
     perform(a.name, function (done) {
       FrameDevice.input(a.input, function (err, source) {
-        if (!err) { live = { name: a.name, source: source }; document.documentElement.className += ' is-live'; }
+        if (!err) {
+          watching = { name: a.name, source: source };
+          document.documentElement.className += ' is-live';
+          if (source && source.type === 'TV') showBanner(source.channel || 'Live TV');
+        }
         done(err);
       });
     });
   }
+  function changeChannel(step) {
+    if (!watching || watching.source.type !== 'TV') return;
+    FrameDevice.channel(step, function (err, name) {
+      if (!watching) return;
+      if (err) showBanner(err.message || 'Could not change channel');
+      else { watching.source.channel = name || ''; showBanner(name || (step > 0 ? 'Channel up' : 'Channel down')); }
+    });
+  }
   function stopInput() {
-    if (!live) return;
-    live = null; document.documentElement.className = document.documentElement.className.replace(/\s*is-live/g, '');
+    if (!watching) return;
+    watching = null; clearTimeout(bannerTimer); banner.className = 'live-banner';
+    document.documentElement.className = document.documentElement.className.replace(/\s*is-live/g, '');
     FrameDevice.stopInput(function () {}); render(); focusStage();
   }
-  QA.live = function () { return live ? { name: live.name, source: live.source } : null; };
+  QA.live = function () { return watching ? { name: watching.name, source: watching.source, banner: banner.className.indexOf('is-on') >= 0 ? banner.textContent : '' } : null; };
   function refreshCatalog() {
     var request, oldFocus;
     if (catalog.loading) return;
@@ -1846,10 +1865,11 @@
   document.addEventListener('keydown', function (ev) {
     var code = ev.keyCode, k = KEYS[code];
     if (code === 9) { ev.preventDefault(); return; }
+    if (watching && (code === 427 || code === 428 || code === 33 || code === 34)) { ev.preventDefault(); changeChannel(code === 427 || code === 33 ? 1 : -1); return; }
     if (!k || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     ev.preventDefault();
     if (k === 'ok' || k === 'back') { if (ev.repeat || heldKeys[code]) return; heldKeys[code] = true; }
-    if (live) { if (k === 'back') stopInput(); return; }
+    if (watching) { if (k === 'back') stopInput(); return; }
     press(k);
   });
   document.addEventListener('keyup', function (ev) { delete heldKeys[ev.keyCode]; });
